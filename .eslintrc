@@ -1,0 +1,12 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+    "eqeqeq": "off",
+    "curly": "error",
+    "quotes": ["error", "double"],
+    "undescore": "allow",
+    "allow": ["foo_", "_bar"] 
+}
+
+}
+
