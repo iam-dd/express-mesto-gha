@@ -1,12 +1,9 @@
 {
+  "root": true,
   "extends": "airbnb-base",
   "rules": {
-    "eqeqeq": "off",
-    "curly": "error",
-    "quotes": ["error", "double"],
-    "undescore": "allow",
-    "allow": ["foo_", "_bar"] 
+    "no-console": 0,
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": false, "optionalDependencies": false, "peerDependencies": false}]
+  }
 }
-
-}
-
