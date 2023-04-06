@@ -10,7 +10,7 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(badRequest).send({ message: 'Ошибка валидации' });
+        return res.status(badRequest).send({ message: 'Ошибка валидации' });
       }
       return res
         .status(internalServerError)
