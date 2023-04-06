@@ -12,13 +12,18 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(badRequest).send({ message: 'Ошибка валидации' });
       }
+      return res
+        .status(internalServerError)
+        .send({ message: 'Что-то пошло не так...' });
     });
 };
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Ошибка!' }));
+    .then((users) => res.send({ data: users }))
+    .catch(() => res
+      .status(internalServerError)
+      .send({ message: 'Что-то пошло не так...' }));
 };
 
 module.exports.getUserById = (req, res) => {
