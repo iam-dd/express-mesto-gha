@@ -1,9 +1,18 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-
 const badRequest = 400;
 const notFound = 404;
 const internalServerError = 500;
+const Unauthorized = 401;
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredential(email, password).then((user) => {
+// Завтра здесь будем создавать токен
+  }).catch((err) => {
+    res.statu(Unauthorized).send({ message: err });
+  });
+};
 
 module.exports.createUser = (req, res) => {
   const {
