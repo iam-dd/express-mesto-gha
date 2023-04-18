@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
 const badRequest = 400;
 const notFound = 404;
 const internalServerError = 500;
@@ -8,7 +10,8 @@ const Unauthorized = 401;
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredential(email, password).then((user) => {
-// Завтра здесь будем создавать токен
+    const token = jwt.sign({ _id: user._id }, 'some-secret-token', { expiresIn: '7d' });
+    res.send({ token });
   }).catch((err) => {
     res.statu(Unauthorized).send({ message: err });
   });
