@@ -1,4 +1,6 @@
+require('dotenv').config();
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { login, createUser } = require('./controllers/users');
@@ -6,8 +8,13 @@ const { login, createUser } = require('./controllers/users');
 const notFound = 404;
 
 const app = express();
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
 const { PORT = 3000 } = process.env;
 
+app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
