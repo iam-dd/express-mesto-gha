@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { login, createUser } = require('./controllers/users');
@@ -14,6 +15,7 @@ const limiter = rateLimit({
 });
 const { PORT = 3000 } = process.env;
 
+app.use(helmet());
 app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,14 +24,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb').then(() => console.log('Co
 
 app.post('/signin', login);
 app.post('/signup', createUser);
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '642af5bb4d0917b554525776',
-  };
-
-  next();
-});
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));

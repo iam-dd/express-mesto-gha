@@ -9,16 +9,6 @@ const notFound = 404;
 const internalServerError = 500;
 const Unauthorized = 401;
 
-module.exports.login = (req, res) => {
-  const { email, password } = req.body;
-  return User.findUserByCredentials(email, password).then((user) => {
-    const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-    res.cookie('jwt', token, { maxage: 360000, httpOnly: true }).send({ token });
-  }).catch((err) => {
-    res.statu(Unauthorized).send({ message: err });
-  });
-};
-
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
@@ -112,4 +102,25 @@ module.exports.updateAvatar = (req, res) => {
         .status(internalServerError)
         .send({ message: 'Что-то пошло не так...' });
     });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      }
+      return next(new NotFound('Пользователь не найден'));
+    })
+    .catch(next);
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password).then((user) => {
+    const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+    res.cookie('jwt', token, { maxage: 360000, httpOnly: true }).send({ token });
+  }).catch((err) => {
+    res.statu(Unauthorized).send({ message: err });
+  });
 };
