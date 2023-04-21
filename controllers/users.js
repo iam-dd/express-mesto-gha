@@ -4,12 +4,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const badRequest = 400;
-const notFound = 404;
-const internalServerError = 500;
-const Unauthorized = 401;
+const BadRequest = require('../errors/BadRequest');
+const NotFound = require('../errors/NotFound');
+const Unauthorized = require('../errors/Unauthorized');
+const Duplicate = require('../errors/Duplicate');
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -23,85 +23,54 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'Ошибка валидации' });
+        next(new BadRequest('Некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new Duplicate('Такой email уже зарегистрирован'));
+      } else {
+        next(err);
       }
-      return res
-        .status(internalServerError)
-        .send({ message: 'Что-то пошло не так...' });
     });
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res
-      .status(internalServerError)
-      .send({ message: 'Что-то пошло не так...' }));
+    .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
         return res.send({ data: user });
       }
-      return res
-        .status(notFound)
-        .send({ message: 'Пользователь по указанному _id не найден.' });
+      return next(new NotFound('Пользователь не найден'));
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(badRequest)
-          .send({ message: 'Некорректный _id пользователя.' });
-      }
-      return res
-        .status(internalServerError)
-        .send({ message: 'Что-то пошло не так...' });
-    });
+    .catch(next);
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         return res.send({ data: user });
       }
-      return res
-        .status(notFound)
-        .send({ message: 'Пользователь с указанным _id не найден.' });
+      return next(new NotFound('Пользователь не найден'));
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(badRequest)
-          .send({
-            message: 'Переданы некорректные данные при обновлении профиля.',
-          });
-      }
-      return res
-        .status(internalServerError)
-        .send({ message: 'Что-то пошло не так...' });
-    });
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((updateAvatar) => res.send({ data: updateAvatar }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(badRequest)
-          .send({
-            message: 'Переданы некорректные данные при создании карточки.',
-          });
+        next(new BadRequest('Некорректные данные'));
       }
-      return res
-        .status(internalServerError)
-        .send({ message: 'Что-то пошло не так...' });
-    });
+    })
+    .catch(next);
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -121,6 +90,6 @@ module.exports.login = (req, res) => {
     const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
     res.cookie('jwt', token, { maxage: 360000, httpOnly: true }).send({ token });
   }).catch((err) => {
-    res.statu(Unauthorized).send({ message: err });
+    res.status(Unauthorized).send({ message: err });
   });
 };

@@ -1,17 +1,17 @@
 const jwt = require('jsonwebtoken');
 
-const badRequest = 400;
-const Unauthorized = 401;
+const BadRequest = require('../errors/BadRequest');
+const Unauthorized = require('../errors/Unauthorized');
 
 module.exports = (req, res, next) => {
   try {
     const token = req.header('x-auth-token');
-    if (!token) return res.status(Unauthorized).send('Ошибка авторизации');
+    if (!token) next(new Unauthorized('Неверный токен'));
 
     const authenticated = jwt.verify(token, process.env.JWT_SECRET);
     req.user = authenticated;
     next();
   } catch (error) {
-    res.status(badRequest).send('Неверный токен');
+    res.status(BadRequest).send('Неверный токен');
   }
 };
