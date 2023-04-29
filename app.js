@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 
 const notFound = 404;
@@ -15,6 +16,7 @@ const limiter = rateLimit({
 });
 const { PORT = 3000 } = process.env;
 
+app.use(errors());
 app.use(helmet());
 app.use(limiter);
 app.use(bodyParser.json());
