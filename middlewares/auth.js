@@ -1,17 +1,25 @@
 const jwt = require('jsonwebtoken');
 
-const BadRequest = require('../errors/BadRequest');
+const { NODE_ENV, JWT_SECRET } = process.env;
 const Unauthorized = require('../errors/Unauthorized');
 
 module.exports = (req, res, next) => {
-  try {
-    const token = req.header('x-auth-token');
-    if (!token) next(new Unauthorized('Неверный токен'));
+  const { authorization } = req.headers;
 
-    const authenticated = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = authenticated;
-    next();
-  } catch (error) {
-    res.status(BadRequest).send('Неверный токен');
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return next(new Unauthorized('Необходима авторизация'));
   }
+
+  const token = authorization.replace('Bearer ', '');
+
+  let payload;
+
+  try {
+    payload = jwt.verify(token, `${NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret'}`);
+  } catch (err) {
+    return next(new Unauthorized('Необходима авторизация'));
+  }
+
+  req.user = payload;
+  return next();
 };
