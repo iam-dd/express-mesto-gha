@@ -98,7 +98,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -108,10 +108,14 @@ module.exports.login = (req, res) => {
         { expiresIn: '7d' },
       );
       res
-        .cookie('jwt', token, { maxage: 360000, httpOnly: true })
-        .send({ token });
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        });
+      return res.send({ token });
     })
     .catch((err) => {
-      res.status(Unauthorized).send({ message: err });
+      next(err);
     });
 };
