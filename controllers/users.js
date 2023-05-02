@@ -6,7 +6,6 @@ const User = require('../models/user');
 
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
-const Unauthorized = require('../errors/Unauthorized');
 const Duplicate = require('../errors/Duplicate');
 
 module.exports.createUser = (req, res, next) => {
