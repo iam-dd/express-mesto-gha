@@ -11,10 +11,10 @@ const Duplicate = require('../errors/Duplicate');
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, about, avatar, email,
   } = req.body;
   bcrypt
-    .hash(password, 10)
+    .hash(req.body.password, 10)
     .then((hash) => User.create({
       name,
       about,
@@ -22,7 +22,11 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      const createUser = JSON.parse(JSON.stringify(user));
+      delete createUser.password;
+      res.send({ data: createUser });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Некорректные данные'));
