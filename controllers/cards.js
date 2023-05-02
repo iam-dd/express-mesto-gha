@@ -12,11 +12,9 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(badRequest)
-          .send({
-            message: 'Переданы некорректные данные при создании карточки.',
-          });
+        return res.status(badRequest).send({
+          message: 'Переданы некорректные данные при создании карточки.',
+        });
       }
       return res
         .status(internalServerError)
@@ -55,7 +53,11 @@ module.exports.cardDelete = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
     .then((like) => {
       if (!like) {
         return res
@@ -66,12 +68,9 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(badRequest)
-          .send({
-            message:
-            'Переданы некорректные данные для постановки/снятии лайка.',
-          });
+        return res.status(badRequest).send({
+          message: 'Переданы некорректные данные для постановки/снятии лайка.',
+        });
       }
       return res
         .status(internalServerError)
@@ -80,7 +79,11 @@ module.exports.likeCard = (req, res) => {
 };
 
 module.exports.dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
     .then((like) => {
       if (like) {
         return res.send({ data: like });
@@ -91,12 +94,9 @@ module.exports.dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(badRequest)
-          .send({
-            message:
-            'Переданы некорректные данные для постановки/снятии лайка.',
-          });
+        return res.status(badRequest).send({
+          message: 'Переданы некорректные данные для постановки/снятии лайка.',
+        });
       }
       return res
         .status(internalServerError)

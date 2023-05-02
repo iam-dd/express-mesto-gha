@@ -22,7 +22,10 @@ app.use(limiter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/mestodb').then(() => console.log('Connected')).catch((err) => (console.log(err.message)));
+mongoose
+  .connect('mongodb://localhost:27017/mestodb')
+  .then(() => console.log('Connected'))
+  .catch((err) => console.log(err.message));
 
 app.post('/signin', login);
 app.post('/signup', createUser);
