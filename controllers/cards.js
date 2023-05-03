@@ -31,20 +31,20 @@ module.exports.getCards = (req, res) => {
       .send({ message: 'Что-то пошло не так...' }));
 };
 
-module.exports.cardDelete = (req, res, next) => {
-  Card.findById(req.params.cardId)
+module.exports.cardDelete = (req, res) => {
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res
-          .status(notFound)
+        return res
+          .status(forbidden)
           .send({ message: 'Карточка с указанным _id не найдена.' });
       }
       if (String(card.owner) !== req.user._id) {
-        res
-          .status(forbidden)
-          .send({ message: 'Вы не можете удалять чужие карточки.' });
+        return res
+          .status(notFound)
+          .send({ message: 'Нельзя удалять чужие карточки.' });
       }
-      card.remove().then(() => res.status(200).send({ data: card })).catch(next);
+      return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
