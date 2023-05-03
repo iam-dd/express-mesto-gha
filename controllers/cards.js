@@ -38,13 +38,13 @@ module.exports.cardDelete = (req, res, next) => {
         res
           .status(notFound)
           .send({ message: 'Карточка с указанным _id не найдена.' });
-      } else if (String(card.owner) !== req.user._id) {
+      }
+      if (String(card.owner) !== req.user._id) {
         res
           .status(forbidden)
           .send({ message: 'Вы не можете удалять чужие карточки.' });
-      } else {
-        card.remove().then(() => res.status(200).send({ data: card })).catch(next);
       }
+      card.remove().then(() => res.status(200).send({ data: card })).catch(next);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
