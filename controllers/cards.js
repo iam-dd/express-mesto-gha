@@ -46,9 +46,9 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((like) => {
       if (!like) {
-        return res.send({ data: like });
+        return next(new NotFound('Передан несуществующий _id карточки.'));
       }
-      return next(new NotFound('Передан несуществующий _id карточки.'));
+      return res.send({ data: like });
     })
     .catch(next);
 };
