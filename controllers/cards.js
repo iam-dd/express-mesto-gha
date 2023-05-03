@@ -3,6 +3,7 @@ const Card = require('../models/card');
 const badRequest = 400;
 const notFound = 404;
 const internalServerError = 500;
+const forbidden = 403;
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
@@ -33,12 +34,17 @@ module.exports.getCards = (req, res) => {
 module.exports.cardDelete = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (card) {
-        return card.remove().then(() => res.status(200).send({ data: card })).catch(next);
+      if (!card) {
+        res
+          .status(notFound)
+          .send({ message: 'Карточка с указанным _id не найдена.' });
+      } else if (String(card.owner) !== req.user._id) {
+        res
+          .status(forbidden)
+          .send({ message: 'Вы не можете удалять чужие карточки.' });
+      } else {
+        card.remove().then(() => res.status(200).send({ data: card })).catch(next);
       }
-      return res
-        .status(notFound)
-        .send({ message: 'Карточка с указанным _id не найдена.' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
