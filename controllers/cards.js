@@ -36,12 +36,12 @@ module.exports.cardDelete = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(forbidden)
+          .status(notFound)
           .send({ message: 'Карточка с указанным _id не найдена.' });
       }
       if (String(card.owner) !== req.user._id) {
         return res
-          .status(notFound)
+          .status(forbidden)
           .send({ message: 'Нельзя удалять чужие карточки.' });
       }
       return res.send({ data: card });
