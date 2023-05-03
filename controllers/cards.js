@@ -32,17 +32,25 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.cardDelete = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (!card) {
-        res.status(notFound).send({ message: 'Карточка с указанным _id не найдена.' });
-      } else if (String(card.owner) !== req.user._id) {
-        res.status(forbidden).send({ message: 'Вы не можете удалять чужие карточки' });
-      } else {
-        card.remove().then(() => res.status(200).send({ data: card })).catch(next);
+      if (card) {
+        return card.remove().then(() => res.status(200).send({ data: card })).catch(next);
       }
+      return res
+        .status(notFound)
+        .send({ message: 'Карточка с указанным _id не найдена.' });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res
+          .status(badRequest)
+          .send({ message: 'Передан несуществующий _id карточки.' });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: 'Что-то пошло не так...' });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
