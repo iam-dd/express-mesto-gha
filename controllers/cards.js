@@ -3,7 +3,7 @@ const Card = require('../models/card');
 const badRequest = 400;
 const notFound = 404;
 const internalServerError = 500;
-const forbidden = 403;
+
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
