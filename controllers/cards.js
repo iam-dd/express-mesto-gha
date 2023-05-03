@@ -32,7 +32,7 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.cardDelete = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         res
